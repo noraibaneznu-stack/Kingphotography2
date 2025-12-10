@@ -48,16 +48,18 @@ export async function POST(request: Request) {
 
     // Simulate password delivery
     const deliveryMethods = ['email', 'sms', 'whatsapp']
-    for (const deliveryMethod of deliveryMethods) {
-      await prisma.deliveryLog.create({
-        data: {
-          projectId,
-          method: deliveryMethod,
-          status: 'sent',
-          message: `Password sent via ${deliveryMethod} (SIMULATED)`,
-        },
-      })
-    }
+    await Promise.all(
+      deliveryMethods.map((deliveryMethod) =>
+        prisma.deliveryLog.create({
+          data: {
+            projectId,
+            method: deliveryMethod,
+            status: 'sent',
+            message: `Password sent via ${deliveryMethod} (SIMULATED)`,
+          },
+        })
+      )
+    )
 
     // Update project status to delivered
     await prisma.project.update({

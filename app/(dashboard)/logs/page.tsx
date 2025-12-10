@@ -36,19 +36,16 @@ export default function LogsPage() {
       const res = await fetch('/api/projects')
       const projects = await res.json()
       
-      // Extract all delivery logs
-      const allLogs: DeliveryLog[] = []
-      projects.forEach((project: any) => {
-        project.deliveryLogs.forEach((log: any) => {
-          allLogs.push({
-            ...log,
-            project: {
-              name: project.name,
-              client: project.client,
-            },
-          })
-        })
-      })
+      // Extract all delivery logs using flatMap
+      const allLogs: DeliveryLog[] = projects.flatMap((project: any) =>
+        project.deliveryLogs.map((log: any) => ({
+          ...log,
+          project: {
+            name: project.name,
+            client: project.client,
+          },
+        }))
+      )
       
       // Sort by sentAt descending
       allLogs.sort((a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime())
