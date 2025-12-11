@@ -8,5 +8,7 @@ export const config = {
     '/payments/:path*',
     '/logs/:path*',
     '/settings/:path*',
+    '/client/dashboard/:path*',
+    '/client/payment/:path*',
   ],
 }
