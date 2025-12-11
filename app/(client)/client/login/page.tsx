@@ -10,10 +10,10 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Camera } from 'lucide-react'
 
-export default function LoginPage() {
+export default function ClientLoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('admin@kingkidd.com')
-  const [password, setPassword] = useState('demo123')
+  const [identifier, setIdentifier] = useState('john.doe@example.com')
+  const [password, setPassword] = useState('client123')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -24,15 +24,15 @@ export default function LoginPage() {
 
     try {
       const result = await signIn('credentials', {
-        identifier: email,
+        identifier,
         password,
         redirect: false,
       })
 
       if (result?.error) {
-        setError('Invalid email or password')
+        setError('Invalid email/phone or password')
       } else {
-        router.push('/dashboard')
+        router.push('/client/dashboard')
         router.refresh()
       }
     } catch (error) {
@@ -72,26 +72,31 @@ export default function LoginPage() {
               <CardDescription className="text-base mt-2">Stories That Connect</CardDescription>
             </div>
             <div>
-              <h2 className="text-xl font-semibold">Admin Login</h2>
-              <p className="text-sm text-gray-500 mt-1">Welcome back! Please login to your account.</p>
+              <h2 className="text-xl font-semibold">Client Portal</h2>
+              <p className="text-sm text-gray-500 mt-1">Login to view your photography projects</p>
             </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="identifier">Email or Phone Number</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@kingkidd.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="identifier"
+                  type="text"
+                  placeholder="john.doe@example.com or +254712345678"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   required
                   disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="password">Password</Label>
+                  <Link href="/client/forgot-password" className="text-xs text-primary hover:underline">
+                    Forgot Password?
+                  </Link>
+                </div>
                 <Input
                   id="password"
                   type="password"
@@ -117,14 +122,15 @@ export default function LoginPage() {
             <div className="mt-6 pt-6 border-t border-gray-200">
               <div className="text-sm text-gray-600 space-y-1">
                 <p className="font-semibold">Demo Credentials:</p>
-                <p>Email: admin@kingkidd.com</p>
-                <p>Password: demo123</p>
+                <p>Email: john.doe@example.com</p>
+                <p>Phone: +254712345678</p>
+                <p>Password: client123</p>
               </div>
             </div>
 
             <div className="mt-4 text-center">
-              <Link href="/client/login" className="text-sm text-primary hover:underline">
-                Client Login →
+              <Link href="/login" className="text-sm text-primary hover:underline">
+                Admin Login →
               </Link>
             </div>
           </CardContent>

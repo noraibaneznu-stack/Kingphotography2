@@ -25,6 +25,7 @@ model Client {
   name        String
   email       String    @unique
   phone       String?
+  password    String?
   whatsapp    String?
   projects    Project[]
   createdAt   DateTime  @default(now())
@@ -37,6 +38,7 @@ model Project {
   contentLink String
   password    String
   price       Float
+  photoCount  Int           @default(0)
   status      String        @default("pending") // pending, paid, delivered
   client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId    String
@@ -54,6 +56,7 @@ model Payment {
   projectId       String
   amount          Float
   method          String   // mpesa, paypal, bank
+  phoneNumber     String?
   status          String   @default("pending") // pending, confirmed, failed
   transactionRef  String?
   confirmedAt     DateTime?
@@ -73,4 +76,15 @@ model DeliveryLog {
   sentAt     DateTime @default(now())
 
   @@index([projectId])
+}
+
+model OTPVerification {
+  id         String   @id @default(cuid())
+  email      String?
+  phone      String?
+  code       String
+  type       String   // login, password-reset
+  verified   Boolean  @default(false)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
 }

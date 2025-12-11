@@ -3,7 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { compare } from 'bcryptjs'
 import { prisma } from './prisma'
 
-export const authOptions: NextAuthOptions = {
+export const clientAuthOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -16,24 +16,7 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        // First try to find admin user by email
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.identifier },
-        })
-
-        if (user) {
-          const isPasswordValid = await compare(credentials.password, user.password)
-          if (isPasswordValid) {
-            return {
-              id: user.id,
-              email: user.email,
-              name: user.name,
-              role: user.role,
-            }
-          }
-        }
-
-        // If not found as admin, try to find as client by email or phone
+        // Try to find client by email or phone
         const client = await prisma.client.findFirst({
           where: {
             OR: [
@@ -43,19 +26,22 @@ export const authOptions: NextAuthOptions = {
           },
         })
 
-        if (client && client.password) {
-          const isPasswordValid = await compare(credentials.password, client.password)
-          if (isPasswordValid) {
-            return {
-              id: client.id,
-              email: client.email,
-              name: client.name,
-              role: 'client',
-            }
-          }
+        if (!client || !client.password) {
+          return null
         }
 
-        return null
+        const isPasswordValid = await compare(credentials.password, client.password)
+
+        if (!isPasswordValid) {
+          return null
+        }
+
+        return {
+          id: client.id,
+          email: client.email,
+          name: client.name,
+          role: 'client',
+        }
       },
     }),
   ],
@@ -76,7 +62,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: '/login',
+    signIn: '/client/login',
   },
   session: {
     strategy: 'jwt',
