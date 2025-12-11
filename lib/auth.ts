@@ -8,34 +8,54 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: { label: 'Email', type: 'email' },
+        identifier: { label: 'Email or Phone', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.identifier || !credentials?.password) {
           return null
         }
 
+        // First try to find admin user by email
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: credentials.identifier },
         })
 
-        if (!user) {
-          return null
+        if (user) {
+          const isPasswordValid = await compare(credentials.password, user.password)
+          if (isPasswordValid) {
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+            }
+          }
         }
 
-        const isPasswordValid = await compare(credentials.password, user.password)
+        // If not found as admin, try to find as client by email or phone
+        const client = await prisma.client.findFirst({
+          where: {
+            OR: [
+              { email: credentials.identifier },
+              { phone: credentials.identifier },
+            ],
+          },
+        })
 
-        if (!isPasswordValid) {
-          return null
+        if (client && client.password) {
+          const isPasswordValid = await compare(credentials.password, client.password)
+          if (isPasswordValid) {
+            return {
+              id: client.id,
+              email: client.email,
+              name: client.name,
+              role: 'client',
+            }
+          }
         }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        }
+        return null
       },
     }),
   ],

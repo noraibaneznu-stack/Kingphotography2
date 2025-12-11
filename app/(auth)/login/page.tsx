@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -23,7 +24,7 @@ export default function LoginPage() {
 
     try {
       const result = await signIn('credentials', {
-        email,
+        identifier: email,
         password,
         redirect: false,
       })
@@ -119,6 +120,12 @@ export default function LoginPage() {
                 <p>Email: admin@kingkidd.com</p>
                 <p>Password: demo123</p>
               </div>
+            </div>
+
+            <div className="mt-4 text-center">
+              <Link href="/client/login" className="text-sm text-primary hover:underline">
+                Client Login →
+              </Link>
             </div>
           </CardContent>
         </Card>
